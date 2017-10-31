@@ -1,0 +1,19 @@
+@import "../../assets/css/fonts.css";
+
+.el-row {
+  height: 100%;
+  width: 100%;
+  text-align: center;
+  box-shadow: #999 0 -2px 3px;
+  .el-col {
+    .icon {
+      display: block;
+      font-size: 3rem;
+      color: #414448;
+    }
+    a {
+      font-size: 1.2rem;
+      color: #38393d;
+    }
+  }
+}
