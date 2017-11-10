@@ -1,5 +1,3 @@
-<link rel="stylesheet" href="register.scss">
-<link rel="stylesheet" href="../Login/login.scss">
 <template>
   <div class="m-page-field">
     <mt-field label="手机号" placeholder="请输入手机号" type="tel" v-model="phone" :state="state"></mt-field>
@@ -8,7 +6,7 @@
       <mt-button type="primary" plain :disabled="isDisabled" @click="sendMes">{{ buttonText }}</mt-button>
     </mt-field>
     <div class="u-divide"></div>
-    <mt-button @click="checkForm" class="u-submit" :disabled="isWrong" size="large">登&nbsp;&nbsp;陆</mt-button>
+    <mt-button @click="checkForm" class="u-submit" :disabled="isWrong" size="large">确&nbsp;&nbsp;认</mt-button>
   </div>
 </template>
 
@@ -111,5 +109,5 @@
 
 <style lang="scss" scoped>
   @import "../../assets/css/mixin";
-  @import "register";
+  @import "login";
 </style>

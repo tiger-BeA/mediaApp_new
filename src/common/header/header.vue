@@ -1,7 +1,5 @@
 <template>
-    <el-row class="m-header">
-      户外媒体村
-    </el-row>
+  <mt-header title="(￣(●●)￣)猪猪之光" fixed></mt-header>
 </template>
 <style lang="scss" scoped>
   @import './header.scss';

@@ -1,21 +1,34 @@
 <template>
-  <el-row type="flex" align="middle">
-    <el-col :span="6">
-      <router-link to="/home"><i class="icon icon-home"></i>首页</router-link>
-    </el-col>
-    <el-col :span="6">
-      <router-link to="/more"><i class="icon icon-more"></i>更多信息</router-link>
-    </el-col>
-    <el-col :span="6">
-      <router-link to="/map"><i class="icon icon-map"></i>媒体地图</router-link>
-    </el-col>
-    <el-col :span="6">
-      <router-link to="/user"><i class="icon icon-user"></i>我的</router-link>
-    </el-col>
-  </el-row>
+  <mt-tabbar v-model="selected" fixed>
+    <mt-tab-item id="首页">
+      <i class="icon icon-home"></i><span class="tlt">首页</span>
+    </mt-tab-item>
+    <mt-tab-item id="更多信息">
+      <i class="icon icon-more"></i><span class="tlt">更多信息</span>
+    </mt-tab-item>
+    <mt-tab-item id="媒体地图">
+      <i class="icon icon-map"></i><span class="tlt">媒体地图</span>
+    </mt-tab-item>
+    <mt-tab-item id="我的">
+      <i class="icon icon-user"></i><span class="tlt">我的</span>
+    </mt-tab-item>
+  </mt-tabbar>
 </template>
 <script>
-  export default {}
+  import bus from '../bus.vue'
+
+  export default {
+    data() {
+      return {
+        selected: ''
+      }
+    },
+    watch: {
+      'selected': function() {
+        bus.$emit('selected', this.selected);
+      }
+    }
+  }
 </script>
 
 <style lang="scss" scoped>

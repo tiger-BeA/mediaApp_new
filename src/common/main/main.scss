@@ -1,0 +1,12 @@
+
+.mint-tab-container{
+  padding: 4rem 0 4.5rem;
+  min-height: 100vh;
+  .mint-tab-container-wrap {
+    //background: #f4f4f6;
+    min-height: calc(100vh - 8.5rem);
+    .mint-tab-container-item {
+      min-height: calc(100vh - 8.5rem);
+    }
+  }
+}

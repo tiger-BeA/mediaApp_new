@@ -1,18 +1,22 @@
-@import "../../assets/css/fonts.css";
-
-.el-row {
-  height: 100%;
-  width: 100%;
+.mint-tabbar {
+  height: 4.5rem;
   text-align: center;
-  box-shadow: #999 0 -2px 3px;
-  .el-col {
+  box-shadow: #e0e0e0 0 -0.0.02rem 0.1rem;
+
+  .mint-tab-item {
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    justify-content: center;
     .icon {
       display: block;
-      font-size: 3rem;
+      margin-bottom: 0.1rem;
+      font-size: 2rem;
       color: #414448;
     }
-    a {
-      font-size: 1.2rem;
+    .tlt {
+      display: block;
+      width: 100%;
       color: #38393d;
     }
   }

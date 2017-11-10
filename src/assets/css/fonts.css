@@ -8,6 +8,12 @@
   font-weight: normal;
   font-style: normal;
 }
+@font-face {
+  /* font-properties */
+  font-family: pictos;
+  src:url('../fonts/element-icons.woff'),
+  url('../fonts/element-icons.ttf')
+}
 
 [class^="icon-"], [class*=" icon-"] {
   /* use !important to prevent issues with browser extensions that change ../fonts */
