@@ -45,14 +45,19 @@
       checkForm() {
         let self = this;
         if (self.phone && self.code) {
-          self.$http.get(`/api/ajax/insertUser?phone=${self.phone}`).then((res) => {
+          self.$http.get(`/api/ajax/queryUsers?phone=${self.phone}`).then((res) => {
             res = res.body;
             if (res.code == 200) {
-              Toast({
-                message: '注册成功',
-                position: 'middle',
-                duration: 2000
-              });
+              if (self.$cookie.get('user')) {
+                Toast({
+                  message: '登陆成功，3秒后返回首页',
+                  position: 'middle',
+                  duration: 2000
+                });
+                setTimeout(function() {
+
+                }, 2000);
+              }
               self.$cookie.set('user', self.phone, 1);
               setTimeout(function() {
                 bus.$emit('selected', '个人信息');

@@ -1,5 +1,3 @@
-<link rel="stylesheet" href="register.scss">
-<link rel="stylesheet" href="../Login/login.scss">
 <template>
   <div class="m-page-field">
     <mt-field label="手机号" placeholder="请输入手机号" type="tel" v-model="phone" :state="state"></mt-field>
@@ -8,7 +6,7 @@
       <mt-button type="primary" plain :disabled="isDisabled" @click="sendMes">{{ buttonText }}</mt-button>
     </mt-field>
     <div class="u-divide"></div>
-    <mt-button @click="checkForm" class="u-submit" :disabled="isWrong" size="large">登&nbsp;&nbsp;陆</mt-button>
+    <mt-button @click="checkForm" class="u-submit" :disabled="isWrong" size="large">注&nbsp;&nbsp;册</mt-button>
   </div>
 </template>
 
@@ -32,14 +30,20 @@
         if (/^((0\d{2,3}-\d{7,8})|(1[3584]\d{9}))$/.test(this.phone)) {
           this.state = 'success';
           this.isDisabled = false;
+          if (this.code == '1234') {
+            this.isWrong = false;
+          }
         } else {
           this.state = '';
           this.isDisabled = true;
+          this.isWrong = true;
         }
       },
       'code': function () {
         if (this.code == '1234' && this.state == 'success') {
           this.isWrong = false;
+        } else {
+          this.isWrong = true;
         }
       }
     },
@@ -103,7 +107,6 @@
             }
           }, 1000);
         });
-
       }
     }
   }

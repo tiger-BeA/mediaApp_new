@@ -117,18 +117,22 @@ apiRoutes.get('/ajax/user', function (req1, res1) {
 apiRoutes.get('/ajax/insertUser', function (req1, res1) {
   try {
     let task = new Task();
-    task.query(sqlState.user.insert, [req1.query.phone], function (err, res) {
+    task.query(sqlState.user.insert, [req1.query.phone], function (err, res2) {
       if (!err) {
-        res1.json({
-          code: 200,
-          data: res,
-          message: 'success'
+        task.query('create user ?@? identified by ?', [req1.query.phone, '%', ''], function(err, res2) {
+          if (!err) {
+            res1.json({
+              code: 200,
+              data: res2,
+              message: 'success'
+            });
+          }
         });
       } else {
         res1.json({
           code: 302,
           data: [],
-          message: res
+          message: res2
         });
       }
     });
