@@ -1,6 +1,22 @@
 .m-page-field {
+  position: relative;
+  top: -2rem;
   padding: 1rem 0;
   height: 100%;
+  .m-icon {
+    width: 100%;
+    text-align: center;
+    margin:  0 0 2.5rem;
+    .icon-panda {
+      display: block;
+      font-size: 6rem;
+    }
+    .u-name {
+      display: block;
+      margin-top: 0.2rem;
+      font-size: 2rem;
+    }
+  }
   .u-submit {
     margin: 20% auto 0;
     width: 92%;
@@ -11,6 +27,13 @@
     .mint-button {
       height: 32px;
       font-size: 1rem;
+    }
+  }
+  .u-router{
+    margin: 1rem 0;
+    text-align: center;
+    a{
+      color: #454545;
     }
   }
 }

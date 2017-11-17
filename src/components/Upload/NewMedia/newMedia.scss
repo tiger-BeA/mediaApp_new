@@ -1,0 +1,34 @@
+.m-new-media {
+  width: 100%;
+  min-height: 100%;
+  padding: 1rem;
+  .u-info {
+    margin: 0 auto;
+    background-color: #fbfdff;
+    border: 1px dashed #c0ccda;
+    border-radius: 6px;
+    box-sizing: border-box;
+    width: 100%;
+    height: 148px;
+    line-height: 146px;
+    vertical-align: top;
+    text-align: center;
+    i {
+      font-size: 28px;
+      color: #8c939d;
+    }
+  }
+  .el-col {
+    &:first-child {
+      text-align: center;
+    }
+    padding: 1rem 0;
+  }
+  .u-btn-submit {
+    display: block;
+    margin: 1rem auto;
+    width: 92%;
+    background: #28af2e;
+    color: #FFF;
+  }
+}

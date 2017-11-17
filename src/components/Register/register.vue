@@ -1,5 +1,15 @@
 <template>
   <div class="m-page-field">
+    <div class="m-icon">
+        <span class="icon-panda">
+            <span class="path1"></span><span class="path2"></span><span class="path3"></span><span
+          class="path4"></span><span class="path5"></span><span class="path6"></span><span class="path7"></span><span
+          class="path8"></span><span class="path9"></span><span class="path10"></span><span class="path11"></span><span
+          class="path12"></span><span class="path13"></span><span class="path14"></span><span
+          class="path15"></span><span class="path16"></span><span class="path17"></span><span class="path18"></span>
+        </span>
+      <span class="u-name">媒&nbsp;&nbsp;体&nbsp;&nbsp;村</span>
+    </div>
     <mt-field label="手机号" placeholder="请输入手机号" type="tel" v-model="phone" :state="state"></mt-field>
     <div class="u-divide"></div>
     <mt-field label="验证码" placeholder="输入验证码" v-model="code">
@@ -7,12 +17,16 @@
     </mt-field>
     <div class="u-divide"></div>
     <mt-button @click="checkForm" class="u-submit" :disabled="isWrong" size="large">注&nbsp;&nbsp;册</mt-button>
+    <div class="u-router">
+      <router-link to="/login">已有账号？去登陆</router-link>
+    </div>
   </div>
 </template>
 
 <script type="text/ecmascript-6">
   import bus from '../../common/bus.vue'
   import { Toast } from 'mint-ui';
+  import router from '../../router'
 
   export default {
     data() {
@@ -51,7 +65,7 @@
       checkForm() {
         let self = this;
         if (self.phone && self.code) {
-          self.$http.get(`/api/ajax/insertUser?phone=${self.phone}`).then((res) => {
+          self.$http.get(`/ajax/insertUser?phone=${self.phone}`).then((res) => {
             res = res.body;
             if (res.code == 200) {
               Toast({
@@ -60,8 +74,8 @@
                 duration: 2000
               });
               self.$cookie.set('user', self.phone, 1);
-              setTimeout(function() {
-                bus.$emit('selected', '个人信息');
+              setTimeout(function () {
+                router.push('/register/info');
               }, 2000);
             } else if (res.code == 302) {
               Toast({
@@ -76,7 +90,7 @@
                 duration: 2000
               });
             }
-          })
+          });
         }
       },
       sendMes() {

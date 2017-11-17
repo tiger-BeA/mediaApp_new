@@ -17,9 +17,8 @@
 </template>
 
 <script type="text/ecmascript-6">
-  import bus from '../../common/bus.vue'
+  import router from '../../router'
   import {Toast} from 'mint-ui';
-  import ElSelectDropdown from "../../../node_modules/element-ui/packages/select/src/select-dropdown";
   import MtChecklist from "../../../node_modules/mint-ui/packages/checklist/src/checklist";
   import {Cascader} from 'element-ui'
 
@@ -29,7 +28,6 @@
   export default {
     components: {
       MtChecklist,
-      ElSelectDropdown,
       ElCascader: Cascader
     },
     data() {
@@ -58,7 +56,7 @@
           } else {
             granted = MASTER;
           }
-          self.$http.get(`/api/ajax/updateUser?phone=${self.$cookie.get('user')}&identity=${self.identity.join(',')}&city=${self.city.join(',')}&company=${self.company}&qq=${self.qq}&name=${self.name}&granted=${granted}`).then((res) => {
+          self.$http.get(`/ajax/updateUser?phone=${self.$cookie.get('user')}&identity=${self.identity.join(',')}&city=${self.city.join(',')}&company=${self.company}&qq=${self.qq}&name=${self.name}&granted=${granted}`).then((res) => {
             res = res.body;
             if (res.code == 200) {
               Toast({
@@ -67,11 +65,11 @@
                 duration: 3000
               });
               setTimeout(function () {
-                bus.$emit('selected', '首页');
+                router.push('/');
               }, 2000);
             } else if (res.code == 302) {
               Toast({
-                message: '该号码已被注册，换个名字试试？',
+                message: '信息不对啊...找开发问问...',
                 position: 'middle',
                 duration: 2000
               });
@@ -88,7 +86,7 @@
     },
     created() {
       let self = this;
-      self.$http.get('/api/db/citys').then((res) => {
+      self.$http.get('/ajax/getCity').then((res) => {
         res = res.body;
         if (res.code === 200) {
           self.citys = res.data;
@@ -98,7 +96,7 @@
     mounted() {
       let self = this;
       self.$nextTick(function () {
-        self.$http.get(`/api/ajax/queryUsers?phone=${self.$cookie.get('user')}`).then(res => {
+        self.$http.get(`/ajax/getUser?phone=${self.$cookie.get('user')}`).then(res => {
           res = res.body;
           if (res.code == 200) {
             res.data.forEach(item => {

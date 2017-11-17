@@ -1,6 +1,6 @@
 <template>
   <div class="m-history">
-    <v-header title="浏览历史" :backShow=true>
+    <v-header title="我的投放" :backShow=true>
     </v-header>
     <v-detail :popupVisible="popupVisible" :info="curInfo"></v-detail>
     <el-row v-show="!popupVisible" v-if="adInfo">
@@ -15,7 +15,7 @@
         </el-card>
       </el-col>
     </el-row>
-    <div v-else>暂无浏览历史喔~</div>
+    <div v-else>暂无投放喔~</div>
   </div>
 </template>
 
@@ -27,7 +27,7 @@
   export default {
     data() {
       return {
-        adInfo: [],
+        adInfo: null,
         popupVisible: false,
         curInfo: null
       }
@@ -53,12 +53,21 @@
     },
     created() {
       let self = this;
-      self.$http.get(`/ajax/getInfo?id=${self.$localStorage.get('mediaList')}`).then(res => {
-        res = res.body;
-        if (res.code == 200) {
-          self.adInfo = res.data;
-        }
-      });
+      if (self.$cookie.get('user')) {
+        self.$http.get(`/ajax/getReportList?phone=${self.$cookie.get('user')}`).then(res => {
+          res = res.body;
+          if (res.code == 200 && res.data) {
+            self.$http.get(`/ajax/getInfo?id=${res.data}`).then(res => {
+              res = res.body;
+              if (res.code == 200) {
+                self.adInfo = res.data;
+              }
+            });
+          }
+        });
+      } else {
+        router.push('/login');
+      }
     },
     components: {
       'v-detail': detail,
@@ -68,5 +77,5 @@
 </script>
 
 <style lang="scss" rel="stylesheet/scss">
-  @import 'history';
+  @import 'report';
 </style>

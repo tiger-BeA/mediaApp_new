@@ -26,16 +26,18 @@
     },
     mounted() {
       let self = this;
-      self.$http.get('/api/db/mediaInfo').then(res => {
-        res = res.body;
-        if (res.code == 200) {
-          res.data.forEach((item) => {
-            self.info.push(item);
-          });
-          self.fInitMap();
-          self.fAddControl();
-        }
-      })
+      self.$nextTick(function() {
+        self.$http.get('/ajax/getAllInfo').then(res => {
+          res = res.body;
+          if (res.code == 200) {
+            res.data.forEach((item) => {
+              self.info.push(item);
+            });
+            self.fInitMap();
+            self.fAddControl();
+          }
+        });
+      });
     },
     methods: {
       fInitMap: function () {

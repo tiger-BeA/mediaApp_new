@@ -1,0 +1,24 @@
+.m-report {
+  padding: 4.1rem 1rem 1rem;
+  width: 100%;
+  .el-col {
+    margin-top: 4.16667%;
+    margin-bottom: 4.16667%;
+  }
+  .el-card__body {
+    padding: 0;
+  }
+  .m-pic, .m-pic[lazy=loading] {
+    width: auto;
+    min-width: 100%;
+    //height: auto;
+    height: 100px;
+  }
+  .u-tlt {
+    padding: 14px;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}

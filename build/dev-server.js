@@ -1,8 +1,11 @@
 'use strict'
 require('./check-versions')();
 const Task = require('./task');
-const sqlState = require('./sqlState');
+const MASTER = 1,
+  VISITOR = -1,
+  AGENT = 0;
 const config = require('../config');
+
 if (!process.env.NODE_ENV) {
   process.env.NODE_ENV = JSON.parse(config.dev.env.NODE_ENV)
 }
@@ -27,393 +30,497 @@ const app = express();
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
 
-let apiRoutes = express.Router();
-apiRoutes.get('/db/citys', function (req, res) {
-  res.json({
+const str2addSet = function (res, item) {
+  let set = new Set(res.split(',').filter(val => {
+    return val;
+  }));
+  item && set.add(item);
+  let list = Array.from(set);
+  return list.join(',');
+};
+const str2delSet = function (res, item) {
+  let set = new Set(res.split(',').filter(val => {
+    return val;
+  }));
+  item && set.delete(item);
+  let list = Array.from(set);
+  return list.join(',');
+};
+const successRes = function (res) {
+  return {
     code: 200,
-    data: require('../mock/mock.json')
-  });
-});
-apiRoutes.get('/db/mediaInfo', function (req, res1) {
-  try {
-    let task = new Task();
-    task.query(sqlState.info.queryAll, [], function (err, res) {
-      if (!err) {
-        res1.json({
-          code: 200,
-          data: res,
-          message: 'success'
-        });
-      } else {
-        res1.json({
-          code: 302,
-          data: [],
-          message: res
-        });
-      }
-    });
-  } catch (err) {
-    res1.json({
-      code: 404,
-      data: [],
-      message: err
-    });
+    data: res,
+    message: 'success'
+  };
+};
+const warningRes = function (res, code) {
+  return {
+    code: code,
+    data: [],
+    message: res
   }
-});
-apiRoutes.get('/info/:infoId', function (req1, res1) {
-  try {
-    let task = new Task();
-    task.query("select * from info where id=?", [req1.params.infoId], function (err, res) {
-      if (!err) {
-        res1.json({
-          code: 200,
-          data: res,
-          message: 'success'
-        });
-      } else {
-        res1.json({
-          code: 302,
-          data: [],
-          message: res
-        });
-      }
-    });
-  } catch (err) {
-    res1.json({
-      code: 404,
-      data: [],
-      message: err
-    });
+};
+const errorRes = function (err) {
+  return {
+    code: 404,
+    data: [],
+    message: err
   }
+};
+
+let apiRoutes = express.Router();
+
+/*********************************** city ***********************************/
+// table: '',
+// param: [],
+// res: allCity
+apiRoutes.get('/getCity', function (req, res) {
+  res.json(successRes(require('../mock/mock.json')));
 });
 
-apiRoutes.get('/ajax/user', function (req1, res1) {
+/*********************************** users **********************************/
+// table: users
+// param: phone
+// res: []
+apiRoutes.get('/insertUser', function (req1, res1) {
   try {
     let task = new Task();
-    task.query("select * from users where phone=?", [req1.query.phone], function (err, res) {
+    task.query('insert into users(phone) values(?)', [req1.query.phone], function (err, res) {
       if (!err) {
-        res1.json({
-          code: 200,
-          data: res,
-          message: 'success'
-        });
-      } else {
-        res1.json({
-          code: 302,
-          data: [],
-          message: res
-        });
-      }
-    });
-  }
-  catch (err) {
-    res1.json({
-      code: 404,
-      data: [],
-      message: err
-    });
-  }
-});
-apiRoutes.get('/ajax/insertUser', function (req1, res1) {
-  try {
-    let task = new Task();
-    task.query(sqlState.user.insert, [req1.query.phone], function (err, res2) {
-      if (!err) {
-        task.query('create user ?@? identified by ?', [req1.query.phone, '%', ''], function(err, res2) {
+        task.query('CREATE USER ? IDENTIFIED BY ?;', [req1.query.phone, ''], function (err, res) {
           if (!err) {
-            res1.json({
-              code: 200,
-              data: res2,
-              message: 'success'
-            });
+            res1.json(successRes(res));
+          } else {
+            res1.json(warningRes(res, 302));
           }
         });
       } else {
-        res1.json({
-          code: 302,
-          data: [],
-          message: res2
-        });
+        res1.json(warningRes(res, 303));
       }
     });
   }
   catch (err) {
-    res1.json({
-      code: 404,
-      data: [],
-      message: err
-    });
+    res1.json(errorRes(err));
   }
 });
-apiRoutes.get('/ajax/updateUser', function (req1, res1) {
+
+// table: users
+// param: identity, company, city, qq, name, phone, granted
+// res: []
+apiRoutes.get('/updateUser', function (req1, res1) {
   try {
-    let task = new Task();
-    let identity = req1.query.identity,
+    let task = new Task(),
+      identity = req1.query.identity,
       company = req1.query.company,
       city = req1.query.city,
       qq = req1.query.qq,
       name = req1.query.name,
       phone = req1.query.phone,
-      grant = req1.query.grant;
-    let params = [identity, company, city, qq, name, grant, phone];
-    task.query(sqlState.user.update, params, function (err, res) {
+      grant = req1.query.granted;
+    task.query('update users set identity = ?, company = ?, city = ?, qq = ?, name = ?, granted= ? where phone = ?', [identity, company, city, qq, name, grant, phone], function (err, res) {
       if (!err) {
-        res1.json({
-          code: 200,
-          data: res,
-          message: 'success'
+        let _query = [`DROP USER ?@?;`,
+          `CREATE USER ? IDENTIFIED BY ?;`,
+          `GRANT SELECT, UPDATE ON mediainfo.users TO ?@?;`,
+          `GRANT ${(grant == AGENT) ? 'SELECT' : 'ALL'} ON mediainfo.info TO ?@?;`];
+        task = new Task({
+          user: phone,
+          password: ''
         });
+        let queryFunction = function (index, err = false, res = []) {
+          if (index == _4) {
+            if (!err) {
+              res1.json(successRes(res));
+            } else {
+              res1.json(warningRes(res, 302));
+            }
+          } else {
+            let params = [phone, index == 1 ? '%' : ''];
+            if (!err) {
+              task.query(_query[index++], params, function (err, res) {
+                queryFunction(index++, err, res);
+              });
+            } else {
+              res1.json(warningRes(res, 302 + index));
+            }
+          }
+        };
+        queryFunction(0);
+
+        // task.query(_query[0], [phone, '%'], function (err, res) {
+        //   if (!err) {
+        //     task.query(_query[1], [phone, ''], function (err, res) {
+        //       if (!err) {
+        //         task.query(_query[2], [phone, '%'], function (err, res) {
+        //           if (!err) {
+        //             task.query(_query[3], [phone, '%'], function (err, res) {
+        //               if (!err) {
+        //                 res1.json(successRes(res));
+        //               } else {
+        //                 res1.json(warningRes(res, 302));
+        //               }
+        //             })
+        //           } else {
+        //             res1.json(warningRes(res, 303));
+        //           }
+        //         })
+        //       } else {
+        //         res1.json(warningRes(res, 304));
+        //       }
+        //     });
+        //   } else {
+        //     res1.json(warningRes(res, 305));
+        //   }
+        // });
       } else {
-        res1.json({
-          code: 302,
-          data: [],
-          message: res
-        });
+        res1.json(warningRes(res, 306));
       }
     });
   }
   catch (err) {
-    res1.json({
-      code: 404,
-      data: [],
-      message: err
-    });
-  }
-});
-apiRoutes.get('/ajax/queryAllUsers', function (req1, res1) {
-  try {
-    let task = new Task();
-    task.query(sqlState.user.queryAll, [], function (err, res) {
-      if (!err) {
-        res1.json({
-          code: 200,
-          data: res,
-          message: 'success'
-        });
-      } else {
-        res1.json({
-          code: 302,
-          data: [],
-          message: res
-        });
-      }
-    });
-  } catch (err) {
-    res1.json({
-      code: 404,
-      data: [],
-      message: err
-    });
-  }
-});
-apiRoutes.get('/ajax/queryUsers', function (req1, res1) {
-  try {
-    let task = new Task();
-    task.query('select * from users where phone = ?', [req1.query.phone], function (err, res) {
-      if (!err) {
-        res1.json({
-          code: 200,
-          data: res,
-          message: 'success'
-        });
-      } else {
-        res1.json({
-          code: 302,
-          data: [],
-          message: res
-        });
-      }
-    });
-  } catch (err) {
-    res1.json({
-      code: 404,
-      data: [],
-      message: err
-    });
+    res1.json(errorRes(err));
   }
 });
 
-apiRoutes.get('/ajax/addCollectUser', function (req1, res1) {
+// table: users
+// param: phone
+// res: *
+apiRoutes.get('/getUser', function (req1, res1) {
   try {
     let task = new Task();
-    task.query(sqlState.user.queryCollect, [req1.query.phone], function (err, res2) {
+    task.query("select * from users where phone=?", [req1.query.phone], function (err, res) {
       if (!err) {
-        let collectList = [];
-        res2.forEach(val => {
-          if (val.collectList) {
-            collectList = collectList.concat(val.collectList.split(','));
+        res1.json(successRes(res));
+      } else {
+        res1.json(warningRes(res, 302));
+      }
+    });
+  }
+  catch (err) {
+    res1.json(errorRes(err));
+  }
+});
+
+// table: users
+// param: []
+// res: *
+apiRoutes.get('/getAllUser', function (req1, res1) {
+  try {
+    let task = new Task();
+    task.query('select * from users', [], function (err, res) {
+      if (!err) {
+        res1.json(successRes(res));
+      } else {
+        res1.json(warningRes(res, 302));
+      }
+    });
+  } catch (err) {
+    res1.json(errorRes(err));
+  }
+});
+
+// table: users
+// param: phone, item
+// res: collectList
+apiRoutes.get('/addCollect', function (req1, res1) {
+  try {
+    let task = new Task({
+      user: req1.query.phone
+    });
+    task.query('select collectList from users where phone = ?', [req1.query.phone], function (err, res) {
+      if (!err) {
+        let collectList = '';
+        res.forEach(val => {
+          val.collectList && (collectList += val.collectList);
+        });
+        collectList = str2addSet(collectList, req1.query.item);
+        task.query('update users set collectList = ? where phone = ?', [collectList, req1.query.phone], function (err, res) {
+          if (!err) {
+            res1.json(successRes(collectList));
+          } else {
+            res1.json(warningRes(res));
           }
         });
-        collectList.push(req1.query.item);
-        task.query(sqlState.user.addCollect, [collectList.join(','), req1.query.phone], function (err, res3) {
+      } else {
+        res1.json(warningRes(res));
+      }
+    });
+  } catch (err) {
+    res1.json(errorRes(err));
+  }
+});
+
+// table: user
+// param: phone, item
+// res: collectList
+apiRoutes.get('/delCollect', function (req1, res1) {
+  try {
+    let task = new Task();
+    task.query('select collectList from users where phone = ?', [req1.query.phone], function (err, res) {
+        if (!err) {
+          let collectList = '';
+          res.forEach(val => {
+            val.collectList && (collectList += val.collectList);
+          });
+          collectList = str2delSet(collectList, req1.query.item);
+          task.query('update users set collectList = ? where phone = ?', [collectList, req1.query.phone], function (err, res) {
+            if (!err) {
+              res1.json(successRes(collectList));
+            } else {
+              res1.json(warningRes(res, 302));
+            }
+          });
+        } else {
+          res1.json(warningRes(res, 303));
+        }
+      }
+    );
+  } catch (err) {
+    res1.json(errorRes(err));
+  }
+});
+
+// table: user
+// param: phone
+// res: collectList
+apiRoutes.get('/getCollectList', function (req1, res1) {
+  try {
+    let task = new Task();
+    task.query('select collectList from users where phone = ?', [req1.query.phone], function (err, res) {
+        if (!err) {
+          let collectList = '';
+          res.forEach(val => {
+            val.collectList && (collectList += val.collectList);
+          });
+          res1.json(successRes(collectList));
+        }
+        else {
+          res1.json(warningRes(res, 302));
+        }
+      }
+    );
+  } catch (err) {
+    res1.json(errorRes(err));
+  }
+});
+
+// table: user
+// param: phone
+// res: reportList
+apiRoutes.get('/getReportList', function (req1, res1) {
+  try {
+    let task = new Task();
+    task.query('select reportList from users where phone = ?', [req1.query.phone], function (err, res) {
+        if (!err) {
+          let reportList = '';
+          res.forEach(val => {
+            val.reportList && (reportList += val.reportList);
+          });
+          res1.json(successRes(reportList));
+        }
+        else {
+          res1.json(warningRes(res, 302));
+        }
+      }
+    );
+  } catch (err) {
+    res1.json(errorRes(err));
+  }
+});
+
+// table: users
+// param: item, phone
+// res: historyList
+apiRoutes.get('/addHistory', function (req1, res1) {
+  try {
+    let task = new Task();
+
+  } catch (err) {
+    res1.json(errorRes(err));
+  }
+});
+/************************************ info **************************************/
+// table: info
+// param: id
+// res: *
+apiRoutes.get('/getInfo', function (req1, res1) {
+  try {
+    let task = new Task();
+    let idList = req1.query.id.split(','),
+      len = idList.length;
+    let sql = 'select * from info where id=?';
+
+    for (let i = 1; i < len; i++) {
+      idList[i] && (sql += ' or id=?')
+    }
+
+    task.query(sql, idList, function (err, res) {
+      if (!err) {
+        res1.json(successRes(res));
+      } else {
+        res1.json(warningRes(res, 302));
+      }
+    });
+  } catch (err) {
+    res1.json(errorRes(err));
+  }
+});
+
+// table: info
+// param: [],
+// res: *
+apiRoutes.get('/getAllInfo', function (req1, res1) {
+  try {
+    let task = new Task(),
+      isPass = 1;
+    task.query('select * from info where isPass = ?', [isPass], function (err, res) {
+      if (!err) {
+        res1.json(successRes(res));
+      } else {
+        res1.json(warningRes(res, 302));
+      }
+    });
+  } catch (err) {
+    res1.json(errorRes(err));
+  }
+});
+
+/************************************ users & info ***************************/
+// table: users, info
+// param: {
+//     info: id, href, name, place, type, size, flow, detail, livePic
+//     users: phone, item
+// }
+// type: post
+// res: ownerList
+apiRoutes.post('/addInfo', function (req1, res1) {
+  try {
+    let infoParams = res.body.info,
+      id = infoParams.id || '',
+      href = infoParams.href || '',
+      name = infoParams.name || '',
+      place = infoParams.place || '',
+      type = infoParams.type || '',
+      size = infoParams.size || '',
+      flow = infoParams.flow || '',
+      detail = infoParams.detail || '',
+      livePic = infoParams.livePic || '',
+      status = null,
+      isPass = 0;
+    let usersParams = res.body.user,
+      phone = usersParams.phone;
+    let task = new Task({
+      user: phone,
+      password: ''
+    });
+    task.query('insert into info(id, href, name, place, type, size, flow, detail, livePic, status, isPass) values(?,?,?,?,?,?,?,?,?,?,?)', [id, href, name, place, type, size, flow, detail, livePic, status, isPass], function (err, res) {
+      if (!err) {
+        task = new Task({
+          user: phone,
+          password: ''
+        });
+        task.query('select ownerList from users where phone = ?', [req1.query.phone], function (err, res) {
           if (!err) {
-            res1.json({
-              code: 200,
-              data: collectList,
-              message: 'success'
+            let ownerList = '';
+            res.forEach(val => {
+              val.ownerList && (ownerList += val.ownerList);
+            });
+            ownerList = str2addSet(ownerList, id);
+            task.query('update users set ownerList = ? where phone = ?', [ownerList, phone], function (err, res) {
+              if (!err) {
+                res1.json(successRes(res));
+              } else {
+                res1.json(warningRes(res, 302));
+              }
             });
           } else {
-            res1.json({
-              code: 303,
-              data: [],
-              message: err
-            });
+            res1.json(warningRes(res, 303));
           }
         });
       } else {
-        res1.json({
-          code: 302,
-          data: [],
-          message: err
-        });
+        res1.json(warningRes(res, 304));
       }
     });
   } catch (err) {
-    res1.json({
-      code: 404,
-      data: [],
-      message: err
-    });
-  }
-});
-apiRoutes.get('/ajax/cancelCollectUser', function (req1, res1) {
-  try {
-    let task = new Task();
-    task.query(sqlState.user.queryCollect, [req1.query.phone], function (err, res2) {
-        if (!err) {
-          let collectList = [];
-          res2.forEach(val => {
-            if (val.collectList) {
-              collectList = [...collectList, ...(val.collectList.split(','))];
-            }
-          });
-          let deleteTarget = (collectList && req1.query.item) ? collectList.findIndex(val => {
-            return val == req1.query.item
-          }) : -1;
-          if (deleteTarget != -1) {
-            collectList.splice(deleteTarget, 1);
-          }
-          task.query(sqlState.user.addCollect, [collectList.join(','), req1.query.phone], function (err, res3) {
-            if (!err) {
-              res1.json({
-                code: 200,
-                data: collectList,
-                message: 'success'
-              });
-            } else {
-              res1.json({
-                code: 303,
-                data: [],
-                message: err
-              });
-            }
-          });
-        }
-        else {
-          res1.json({
-            code: 302,
-            data: [],
-            message: err
-          });
-        }
-      }
-    );
-  } catch (err) {
-    res1.json({
-      code: 404,
-      data: [],
-      message: err
-    });
-  }
-});
-apiRoutes.get('/ajax/queryCollectUser', function (req1, res1) {
-  try {
-    let task = new Task();
-    task.query(sqlState.user.queryCollect, [req1.query.phone], function (err, res2) {
-        if (!err) {
-          let collectList = [];
-          res2.forEach(val => {
-            if (val.collectList) {
-              collectList = [...collectList, ...(val.collectList.split(','))];
-            }
-          });
-          res1.json({
-            code: 200,
-            data: collectList,
-            message: 'success'
-          });
-        }
-        else {
-          res1.json({
-            code: 302,
-            data: [],
-            message: err
-          });
-        }
-      }
-    );
-  } catch (err) {
-    res1.json({
-      code: 404,
-      data: [],
-      message: err
-    });
-  }
-});
-apiRoutes.get('/ajax/queryAllInfo', function (req1, res1) {
-  try {
-    let task = new Task();
-    task.query(sqlState.info.queryAll, [], function (err, res) {
-      if (!err) {
-        res1.json({
-          code: 200,
-          data: res,
-          message: 'success'
-        });
-      } else {
-        res1.json({
-          code: 302,
-          data: [],
-          message: res
-        });
-      }
-    });
-  } catch (err) {
-    res1.json({
-      code: 404,
-      data: [],
-      message: err
-    });
-  }
-});
-apiRoutes.get('/ajax/queryAll/:ts', function (req1, res1) {
-  try {
-    let task = new Task();
-    task.query(sqlState.profit.queryTs, [res1.query.ts], function (err, res) {
-      if (!err) {
-        res1.json({
-          code: 200,
-          data: res,
-          message: 'success'
-        });
-      } else {
-        res1.json({
-          code: 302,
-          data: [],
-          message: res
-        });
-      }
-    });
-  } catch (err) {
-    res1.json({
-      code: 404,
-      data: [],
-      message: err
-    });
+    res1.json(errorRes(err));
   }
 });
 
-app.use('/api', apiRoutes);
+// table: users, info
+// param: {
+//    user: phone, item,
+//    info: item
+// }
+// type: post
+// res:
+apiRoutes.post('/addReport', function (req1, res1) {
+  try {
+    let phone = req1.body.phone || '',
+      item = req1.body.item || '',
+      status = req1.body.status || '';
+    let task = new Task({
+      user: phone,
+      password: ''
+    });
+    task.query('select reportList from users where phone = ?', [phone], function (err, res) {
+      if (!err) {
+        let reportList = '';
+        res.forEach(val => {
+          val.reportList && (reportList += val.reportList);
+        });
+        reportList = str2addSet(reportList, item);
+        task.query('update users set reportList = ? where phone = ?', [reportList, phone], function (err, res) {
+          if (!err) {
+            task.query('select status from info where id = ?', [item], function (err, res) {
+              if (!err) {
+                let statusList = '';
+                res.forEach(val => {
+                  val.status && (statusList += val.status);
+                });
+                statusList += (statusList ? ',' : '') + status;
+                task.query('update info set status = ? where id = ?', [statusList, item], function (err, res) {
+                  if (!err) {
+                    res1.json(successRes(statusList));
+                  } else {
+                    res1.json(warningRes(res, 302));
+                  }
+                })
+              } else {
+                res1.json(warningRes(res, 303));
+              }
+            });
+          } else {
+            res1.json(warningRes(res));
+          }
+        });
+      } else {
+        res1.json(warningRes(res));
+      }
+    });
+  } catch (err) {
+    res1.json(errorRes(err));
+  }
+});
+/*********************************** other *********************************/
+// table: ?
+// param: []
+// res: *
+apiRoutes.get('/queryAll/:ts', function (req1, res1) {
+  try {
+    let task = new Task();
+    task.query('select * from ?', [res1.query.ts], function (err, res) {
+      if (!err) {
+        res1.json(successRes(res));
+      } else {
+        res1.json(warningRes(res, 302));
+      }
+    });
+  } catch (err) {
+    res1.json(errorRes(err));
+  }
+});
+
+app.use('/ajax', apiRoutes);
 
 const compiler = webpack(webpackConfig);
 

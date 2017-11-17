@@ -55,7 +55,7 @@
   export default {
     data() {
       return {
-        selected: '注册'
+        selected: '首页'
       }
     },
     components: {

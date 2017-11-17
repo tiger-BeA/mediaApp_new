@@ -2,7 +2,7 @@
   <div class="m-home">
     <v-detail :popupVisible="popupVisible" :info="curInfo"></v-detail>
     <el-row v-show="!popupVisible">
-      <el-col :v-show="adInfo" :span="11" v-for="(v, i) in adInfo" :offset="i % 2 == 0 ? 0 : 2">
+      <el-col v-if="adInfo" :span="11" v-for="(v, i) in adInfo" :offset="i % 2 == 0 ? 0 : 2">
         <el-card @click.native="showDetail(v)">
           <img v-lazy="v.livePic" class="m-pic J_lazyload">
           <div class="u-tlt">
@@ -31,7 +31,7 @@
     },
     created() {
       let self = this;
-      self.$http.get('/api/db/mediaInfo').then(res => {
+      self.$http.get('/ajax/getAllInfo').then(res => {
         res = res.body;
         if (res.code == 200) {
           self.adInfo = res.data;
@@ -43,6 +43,8 @@
         this.popupVisible = true;
         this.curInfo = v;
         this.$cookie.set('scrollTop', window.scrollY);
+        let _list = this.$localStorage.get('mediaList');
+        this.$localStorage.set('mediaList', `${_list ? (`${_list},`) : ''}${v.id}`);
       }
     },
     updated() {

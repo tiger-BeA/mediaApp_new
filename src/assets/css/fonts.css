@@ -14,9 +14,8 @@
   src:url('../fonts/element-icons.woff'),
   url('../fonts/element-icons.ttf')
 }
-
 [class^="icon-"], [class*=" icon-"] {
-  /* use !important to prevent issues with browser extensions that change ../fonts */
+  /* use !important to prevent issues with browser extensions that change fonts */
   font-family: 'icomoon' !important;
   speak: none;
   font-style: normal;
@@ -30,6 +29,95 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+.icon-panda .path1:before {
+  content: "\e90c";
+  color: rgb(0, 0, 0);
+}
+.icon-panda .path2:before {
+  content: "\e90d";
+  margin-left: -1em;
+  color: rgb(252, 252, 252);
+}
+.icon-panda .path3:before {
+  content: "\e90e";
+  margin-left: -1em;
+  color: rgb(2, 2, 2);
+}
+.icon-panda .path4:before {
+  content: "\e90f";
+  margin-left: -1em;
+  color: rgb(0, 0, 0);
+}
+.icon-panda .path5:before {
+  content: "\e910";
+  margin-left: -1em;
+  color: rgb(255, 255, 255);
+}
+.icon-panda .path6:before {
+  content: "\e911";
+  margin-left: -1em;
+  color: rgb(0, 0, 0);
+}
+.icon-panda .path7:before {
+  content: "\e912";
+  margin-left: -1em;
+  color: rgb(255, 255, 255);
+}
+.icon-panda .path8:before {
+  content: "\e913";
+  margin-left: -1em;
+  color: rgb(0, 0, 0);
+}
+.icon-panda .path9:before {
+  content: "\e914";
+  margin-left: -1em;
+  color: rgb(255, 255, 255);
+}
+.icon-panda .path10:before {
+  content: "\e915";
+  margin-left: -1em;
+  color: rgb(0, 0, 0);
+}
+.icon-panda .path11:before {
+  content: "\e916";
+  margin-left: -1em;
+  color: rgb(255, 255, 255);
+}
+.icon-panda .path12:before {
+  content: "\e917";
+  margin-left: -1em;
+  color: rgb(0, 0, 0);
+}
+.icon-panda .path13:before {
+  content: "\e918";
+  margin-left: -1em;
+  color: rgb(252, 252, 252);
+}
+.icon-panda .path14:before {
+  content: "\e919";
+  margin-left: -1em;
+  color: rgb(0, 0, 0);
+}
+.icon-panda .path15:before {
+  content: "\e91a";
+  margin-left: -1em;
+  color: rgb(252, 252, 252);
+}
+.icon-panda .path16:before {
+  content: "\e91b";
+  margin-left: -1em;
+  color: rgb(0, 0, 0);
+}
+.icon-panda .path17:before {
+  content: "\e91c";
+  margin-left: -1em;
+  color: rgb(252, 252, 252);
+}
+.icon-panda .path18:before {
+  content: "\e91d";
+  margin-left: -1em;
+  color: rgb(0, 0, 0);
+}
 .icon-addition:before {
   content: "\e900";
 }
@@ -66,4 +154,96 @@
 .icon-vip:before {
   content: "\e90b";
   color: #fc0;
+}
+.icon-frog .path1:before {
+  content: "\e91e";
+  color: rgb(244, 191, 86);
+}
+.icon-frog .path2:before {
+  content: "\e91f";
+  margin-left: -1em;
+  color: rgb(35, 24, 21);
+}
+.icon-frog .path3:before {
+  content: "\e920";
+  margin-left: -1em;
+  color: rgb(38, 163, 130);
+}
+.icon-frog .path4:before {
+  content: "\e921";
+  margin-left: -1em;
+  color: rgb(35, 24, 21);
+}
+.icon-frog .path5:before {
+  content: "\e922";
+  margin-left: -1em;
+  color: rgb(244, 191, 86);
+}
+.icon-frog .path6:before {
+  content: "\e923";
+  margin-left: -1em;
+  color: rgb(35, 24, 21);
+}
+.icon-frog .path7:before {
+  content: "\e924";
+  margin-left: -1em;
+  color: rgb(255, 255, 255);
+}
+.icon-frog .path8:before {
+  content: "\e925";
+  margin-left: -1em;
+  color: rgb(35, 24, 21);
+}
+.icon-frog .path9:before {
+  content: "\e926";
+  margin-left: -1em;
+  color: rgb(255, 255, 255);
+}
+.icon-frog .path10:before {
+  content: "\e927";
+  margin-left: -1em;
+  color: rgb(35, 24, 21);
+}
+.icon-frog .path11:before {
+  content: "\e928";
+  margin-left: -1em;
+  color: rgb(35, 24, 21);
+}
+.icon-frog .path12:before {
+  content: "\e929";
+  margin-left: -1em;
+  color: rgb(35, 24, 21);
+}
+.icon-frog .path13:before {
+  content: "\e92a";
+  margin-left: -1em;
+  color: rgb(35, 24, 21);
+}
+.icon-frog .path14:before {
+  content: "\e92b";
+  margin-left: -1em;
+  color: rgb(255, 255, 255);
+}
+.icon-frog .path15:before {
+  content: "\e92c";
+  margin-left: -1em;
+  color: rgb(255, 255, 255);
+}
+.icon-frog .path16:before {
+  content: "\e92d";
+  margin-left: -1em;
+  color: rgb(35, 24, 21);
+}
+.icon-frog .path17:before {
+  content: "\e92e";
+  margin-left: -1em;
+  color: rgb(35, 24, 21);
+}
+.icon-frog .path18:before {
+  content: "\e92f";
+  margin-left: -1em;
+  color: rgb(255, 255, 255);
+}
+.icon-download:before {
+  content: "\e930";
 }
